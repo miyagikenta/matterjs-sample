@@ -9,8 +9,19 @@ var engine = Matter.Engine.create();
 
 gameEngine.init = function(param) {
 	socketServer = param;
-
 	socketServer.addEvent(gameEngine.addMaterialRandom);
+
+	// メモリリーク対策
+	engine.world.bounds = {
+		min : {
+			x : 0,
+			y : 0
+		},
+		max : {
+			x : 1024,
+			y : 1024
+		}
+	};
 };
 
 var ground = Matter.Bodies.rectangle(400, 610, 800, 60, {
@@ -32,6 +43,14 @@ var fps = 30;
 		if (typeof socketServer === 'undefined') {
 			return;
 		}
+
+		Matter.Events.trigger(engine, 'beforeTick', {
+			timestamp : engine.timing.timestamp
+		});
+		Matter.Events.trigger(engine, 'tick', {
+			timestamp : engine.timing.timestamp
+		});
+
 		Matter.Engine.update(engine, 1000 / fps);
 		var bodies = Matter.Composite.allBodies(engine.world);
 		var sendMsg = [];
@@ -47,13 +66,15 @@ var fps = 30;
 			sendMsg.push(material);
 		});
 
-		if(bodies.length > 30){
-			for(var i = 0; i < bodies.length; i++){
+		if (bodies.length > 30) {
+			for (var i = 0; i < bodies.length; i++) {
 				var removBody = bodies[i];
-				if(!removBody.isStatic){
+				if (!removBody.isStatic) {
 					var removeMateria = {};
 					removeMateria.id = 'material_' + removBody.id;
-					removeMateria.userData = {type : 'remove'};
+					removeMateria.userData = {
+						type : 'remove'
+					};
 					removeMateria.x = removBody.position.x;
 					removeMateria.y = removBody.position.y;
 					removeMateria.angle = removBody.angle;
@@ -68,11 +89,15 @@ var fps = 30;
 
 		socketServer.sendMaterials(sendMsg);
 
+		Matter.Events.trigger(engine, 'afterTick', {
+			timestamp : engine.timing.timestamp
+		});
+
 	}, 1000 / fps);
 })();
 
-gameEngine.addMaterialRandom = function (obj) {
-	if(obj.type !== 'click'){
+gameEngine.addMaterialRandom = function(obj) {
+	if (obj.type !== 'click') {
 		return;
 	}
 
