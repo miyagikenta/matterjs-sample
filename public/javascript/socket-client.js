@@ -15,9 +15,8 @@ $(function() {
 	});
 });
 
-function sendEvent(obj){
-	if(typeof socket !== "undefined"){
+function sendEvent(obj) {
+	if (typeof socket !== "undefined") {
 		socket.emit("event", obj);
 	}
 }
-
