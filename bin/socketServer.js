@@ -23,11 +23,11 @@ socketServer.init = function(server) {
 	});
 };
 
-socketServer.sendMaterials = function(msg) {
-	io.emit('material', msg);
+socketServer.sendAll = function(str, msg) {
+	io.emit(str, msg);
 };
 
-socketServer.addEvent = function(event){
+socketServer.addEvent = function(event) {
 	eventArray.push(event);
 };
 

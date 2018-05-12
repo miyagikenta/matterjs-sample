@@ -87,7 +87,7 @@ var fps = 30;
 			}
 		}
 
-		socketServer.sendMaterials(sendMsg);
+		socketServer.sendAll('material', sendMsg);
 
 		Matter.Events.trigger(engine, 'afterTick', {
 			timestamp : engine.timing.timestamp
